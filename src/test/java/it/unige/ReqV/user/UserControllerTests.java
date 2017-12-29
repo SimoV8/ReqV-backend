@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.cache.support.NullValue;
 import org.springframework.http.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
@@ -31,12 +32,12 @@ public class UserControllerTests {
     private TestRestTemplate restTemplate;
 
     @Autowired
-    public UserRepository repository;
+    private UserRepository repository;
 
     @Autowired
-    BCryptPasswordEncoder bCryptPasswordEncoder;
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    User user1, user2;
+    private User user1, user2;
 
     @Before
     public void setUp() {
@@ -96,7 +97,6 @@ public class UserControllerTests {
         assertThat(response.getBody().getUsername(), nullValue());
         assertThat(response.getBody().getPassword(), nullValue());
         assertThat(response.getBody().getEmail(), nullValue());
-
     }
 
     @Test
@@ -140,11 +140,54 @@ public class UserControllerTests {
         assertThat(response.getBody().getEmail(), is("new_email@test.com"));
         assertThat(response.getBody().getPassword(), nullValue());
 
-
         User updatedUser = repository.findById(user1.getId());
         assertThat(updatedUser.getUsername(), equalTo(response.getBody().getUsername()));
         assertThat(updatedUser.getEmail(), equalTo(response.getBody().getEmail()));
         assertTrue(bCryptPasswordEncoder.matches("new_password", updatedUser.getPassword()));
+    }
+
+    @Test
+    public void testEditUserEmailAndPasswordWithWrongId() {
+        HttpHeaders header = headerWithAuthorizationToken(restTemplate, user1.getUsername(), "1234");
+
+        JSONObject body = new JSONObject();
+        body.put("id", "-1");
+        body.put("username", user1.getUsername());
+        body.put("email", "new_email@test.com");
+        body.put("password", "new_password");
+        HttpEntity<String> request = new HttpEntity<>(body.toString(), header);
+        ResponseEntity<User> response = restTemplate.exchange("/user", HttpMethod.POST, request, User.class);
+
+        assertThat(response.getStatusCode(), equalTo(HttpStatus.BAD_REQUEST));
+        assertThat(response.getBody(), nullValue());
+
+        // Check that the user didn't change
+        User user = repository.findById(user1.getId());
+        assertThat(user.getUsername(), equalTo(user1.getUsername()));
+        assertThat(user.getEmail(), equalTo(user1.getEmail()));
+        assertThat(user.getPassword(), equalTo(user1.getPassword()));
+    }
+
+    @Test
+    public void testEditUserEmailAndPasswordWithWrongUsername() {
+        HttpHeaders header = headerWithAuthorizationToken(restTemplate, user1.getUsername(), "1234");
+
+        JSONObject body = new JSONObject();
+        body.put("id", user1.getId());
+        body.put("username", "wrong");
+        body.put("email", "new_email@test.com");
+        body.put("password", "new_password");
+        HttpEntity<String> request = new HttpEntity<>(body.toString(), header);
+        ResponseEntity<User> response = restTemplate.exchange("/user", HttpMethod.POST, request, User.class);
+
+        assertThat(response.getStatusCode(), equalTo(HttpStatus.BAD_REQUEST));
+        assertThat(response.getBody(), nullValue());
+
+        // Check that the user didn't change
+        User user = repository.findById(user1.getId());
+        assertThat(user.getUsername(), equalTo(user1.getUsername()));
+        assertThat(user.getEmail(), equalTo(user1.getEmail()));
+        assertThat(user.getPassword(), equalTo(user1.getPassword()));
     }
 
     @Test
