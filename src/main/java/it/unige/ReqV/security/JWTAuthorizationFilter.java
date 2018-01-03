@@ -1,5 +1,6 @@
 package it.unige.ReqV.security;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -45,17 +46,19 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
     private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
         String token = request.getHeader(HEADER_STRING);
         if (token != null) {
-            // parse the token.
-            String user = Jwts.parser()
-                    .setSigningKey(SECRET.getBytes())
-                    .parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
-                    .getBody()
-                    .getSubject();
+            try {
+                // parse the token.
+                String user = Jwts.parser()
+                        .setSigningKey(SECRET.getBytes())
+                        .parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
+                        .getBody()
+                        .getSubject();
 
-            if (user != null) {
-                return new UsernamePasswordAuthenticationToken(user, null, new ArrayList<>());
-            }
-            return null;
+                if (user != null) {
+                    return new UsernamePasswordAuthenticationToken(user, null, new ArrayList<>());
+                }
+            } catch (ExpiredJwtException e) { }
+
         }
         return null;
     }
