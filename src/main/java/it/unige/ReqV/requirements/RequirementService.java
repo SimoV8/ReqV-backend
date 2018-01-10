@@ -29,7 +29,7 @@ public class RequirementService {
         if(project == null)
             return null;
         else
-            return requirementRepository.findByProjectId(projectId);
+            return requirementRepository.findByProjectIdOrderById(projectId);
     }
 
     public Requirement getRequirement(Long id) {
@@ -40,11 +40,21 @@ public class RequirementService {
             return null;
     }
 
-    public Requirement save(Requirement requirement) {
-        if(isValid(requirement))
-            return requirementRepository.save(requirement);
+    public Requirement create(Requirement req) {
+        if(req.getId() == null && isValid(req))
+            return requirementRepository.save(req);
         else
             return null;
+    }
+
+    public Requirement update(Requirement req) {
+        Requirement oldReq = getRequirement(req.getId());
+        if(isValid(req) && oldReq != null && oldReq.getProject().getId().equals(req.getProject().getId())) {
+            return requirementRepository.save(req);
+        }
+        else {
+            return null;
+        }
     }
 
     /**
@@ -71,7 +81,7 @@ public class RequirementService {
                 if(line.isEmpty() || line.contains("#"))
                     continue;
                 Requirement req = new Requirement(line, project, Requirement.State.NOT_VALIDATED, null);
-                save(req);
+                create(req);
                 requirements.add(req);
             }
 

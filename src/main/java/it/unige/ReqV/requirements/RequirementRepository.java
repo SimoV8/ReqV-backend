@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface RequirementRepository extends JpaRepository<Requirement, Long> {
 
-    List<Requirement> findByProjectId(Long id);
+    List<Requirement> findByProjectIdOrderById(Long id);
 }

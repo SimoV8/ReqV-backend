@@ -37,11 +37,16 @@ public class RequirementController {
 
     @PostMapping
     public ResponseEntity<?> createRequirement(@Valid @RequestBody Requirement requirement) {
-        requirement = requirementService.save(requirement);
+        requirement = requirementService.create(requirement);
         if (requirement != null)
             return new ResponseEntity<>(requirement, HttpStatus.OK);
         else
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+    }
+
+    @PutMapping
+    public Requirement updateRequirement(@Valid @RequestBody Requirement requirement) {
+        return requirementService.update(requirement);
     }
 
     @PostMapping("/file")
