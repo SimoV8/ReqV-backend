@@ -1,5 +1,6 @@
 package it.unige.ReqV.requirements;
 
+import it.unige.ReqV.engine.EngineFactory;
 import it.unige.ReqV.projects.Project;
 import it.unige.ReqV.projects.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,15 +42,18 @@ public class RequirementService {
     }
 
     public Requirement create(Requirement req) {
-        if(req.getId() == null && isValid(req))
+        if(req.getId() == null && isValid(req)) {
+            req = EngineFactory.getEngine(req.getProject().getType()).validate(req);
             return requirementRepository.save(req);
-        else
+        } else {
             return null;
+        }
     }
 
     public Requirement update(Requirement req) {
         Requirement oldReq = getRequirement(req.getId());
         if(isValid(req) && oldReq != null && oldReq.getProject().getId().equals(req.getProject().getId())) {
+            req = EngineFactory.getEngine(req.getProject().getType()).validate(req);
             return requirementRepository.save(req);
         }
         else {
@@ -63,8 +67,14 @@ public class RequirementService {
      * @return True if the requirement is valid, false otherwise
      */
     public boolean isValid(Requirement req) {
-        return req != null && req.getProject() != null
-                && projectService.getProjectOfAuthUser(req.getProject().getId()) != null;
+        if(req != null && req.getProject() != null) {
+            Project project = projectService.getProjectOfAuthUser(req.getProject().getId());
+            if(project != null) {
+                req.setProject(project); // Can be useful later on
+                return true;
+            }
+        }
+        return false;
     }
 
     public List<Requirement> parseFile(MultipartFile file, Long projectId) {
@@ -80,7 +90,7 @@ public class RequirementService {
                 // Skip empty lines and comments
                 if(line.isEmpty() || line.contains("#"))
                     continue;
-                Requirement req = new Requirement(line, project, Requirement.State.NOT_VALIDATED, null);
+                Requirement req = new Requirement(line, project, Requirement.State.NOT_CHECKED, null);
                 create(req);
                 requirements.add(req);
             }

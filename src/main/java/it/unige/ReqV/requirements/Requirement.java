@@ -10,9 +10,10 @@ import javax.validation.constraints.NotNull;
 public class Requirement {
 
     public enum State {
-        VALID,
-        UNVALID,
-        NOT_VALIDATED
+        COMPLIANT,
+        WARNING,
+        ERROR,
+        NOT_CHECKED
     }
 
     @Id
@@ -30,7 +31,7 @@ public class Requirement {
 
     @JsonIgnore
     @Enumerated(EnumType.STRING)
-    private State state = State.NOT_VALIDATED;
+    private State state = State.NOT_CHECKED;
 
     @JsonIgnore
     private String errorDescription;
