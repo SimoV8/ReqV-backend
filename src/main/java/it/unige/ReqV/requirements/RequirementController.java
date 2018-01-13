@@ -1,13 +1,18 @@
 package it.unige.ReqV.requirements;
 
+import it.unige.ReqV.engine.EngineFactory;
+import it.unige.ReqV.projects.ProjectType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 
 @RestController
@@ -59,5 +64,21 @@ public class RequirementController {
         else
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
     }
-    
+
+    @GetMapping("/translate")
+    public ResponseEntity<?> translateRequirements(@RequestParam("pId") Long projectId) {
+        List<Requirement> reqList = requirementService.getProjectRequirements(projectId);
+        if(reqList == null || reqList.isEmpty())
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        ProjectType projectType = reqList.get(0).getProject().getType();
+        ByteArrayOutputStream stream = EngineFactory.getEngine(projectType).translate(reqList);
+
+        if(stream == null || stream.toByteArray().length == 0)
+            return new ResponseEntity<>("Impossible to translate, check that all requirements are compliant", HttpStatus.BAD_REQUEST);
+        HttpHeaders header = new HttpHeaders();
+        header.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+        return new ResponseEntity<>(stream.toByteArray(), header, HttpStatus.OK);
+    }
+
 }
