@@ -27,10 +27,13 @@ public class RequirementService {
     public List<Requirement> getProjectRequirements(Long projectId) {
         //Check if the authenticated user is the owner of the project
         Project project = projectService.getProjectOfAuthUser(projectId);
+        return getProjectRequirements(project);
+    }
+
+    public List<Requirement> getProjectRequirements(Project project) {
         if(project == null)
             return null;
-        else
-            return requirementRepository.findByProjectIdOrderById(projectId);
+        return requirementRepository.findByProjectIdOrderById(project.getId());
     }
 
     public Requirement getRequirement(Long id) {

@@ -5,6 +5,7 @@ import it.unige.ReqV.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
 
 @Service
@@ -29,13 +30,13 @@ public class ProjectService {
      * @param id Project id
      * @return The requested project or null
      */
-    public Project getProjectOfAuthUser(Long id) {
+    public Project getProjectOfAuthUser(Long id) throws EntityNotFoundException {
         User user = userService.getAuthenticatedUser();
         Project p = projectRepository.findOne(id);
         if (p != null && p.getOwner().getId().equals(user.getId()))
             return p;
         else
-            return null;
+            throw new EntityNotFoundException("Project with id " + id + " does not exist or you don't have the authorization to access it");
     }
 
     /**

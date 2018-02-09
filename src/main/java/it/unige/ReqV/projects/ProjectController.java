@@ -30,12 +30,8 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getProject(@PathVariable("id") Long id) {
-       Project project = projectService.getProjectOfAuthUser(id);
-       if(project != null)
-           return new ResponseEntity<>(project, HttpStatus.OK);
-       else
-           return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+    public Project getProject(@PathVariable("id") Long id) {
+       return projectService.getProjectOfAuthUser(id);
     }
 
     @PostMapping
