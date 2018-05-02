@@ -1,0 +1,3 @@
+[submodule "snl2fl"]
+	path = snl2fl
+	url = git@github.com:SAGE-Lab/snl2fl.git
