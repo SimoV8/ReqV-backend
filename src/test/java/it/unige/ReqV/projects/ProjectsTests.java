@@ -3,6 +3,7 @@ package it.unige.ReqV.projects;
 import it.unige.ReqV.ReqVApplication;
 import it.unige.ReqV.user.User;
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -16,8 +17,13 @@ public class ProjectsTests {
     User user;
 
     @Before
-    void setUp() {
+    public void setUp() {
 
         //user = new User("admin", bCryptPasswordEncoder.encode("1234"), "admin@test.it");
+    }
+
+    @Test
+    public void testGetProjects() {
+
     }
 }

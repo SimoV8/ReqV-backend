@@ -1,1 +1,0 @@
-INSERT INTO req_user (id, email, password, username) VALUES ("admin", "")
