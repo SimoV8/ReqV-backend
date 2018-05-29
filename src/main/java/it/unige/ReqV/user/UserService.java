@@ -24,7 +24,6 @@ public class UserService {
     public User getAuthenticatedUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if(auth.getPrincipal() != null) {
-            logger.info("Fetching User with username {}", auth.getPrincipal());
             return  userRepository.findByUsername(auth.getPrincipal().toString());
         } else {
             logger.info("User not authenticated");
@@ -47,12 +46,10 @@ public class UserService {
     }
 
     public User findById(Long id) {
-        logger.info("Fetching User with id {}", id);
         return userRepository.findById(id);
     }
 
     public User findByUsername(String username) {
-        logger.info("Fetching User with username {}", username);
         return userRepository.findByUsername(username);
     }
 
