@@ -2,6 +2,7 @@ package it.unige.ReqV.requirements;
 
 import com.fasterxml.jackson.annotation.*;
 import it.unige.ReqV.projects.Project;
+import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -36,13 +37,17 @@ public class Requirement {
     @JsonIgnore
     private String errorDescription;
 
+    @ColumnDefault("false")
+    private boolean disabled;
+
     public Requirement() { }
 
-    public Requirement(String text, Project project, State state, String errorDescription) {
+    public Requirement(String text, Project project, State state, String errorDescription, boolean disabled) {
         this.text = text;
         this.project = project;
         this.state = state;
         this.errorDescription = errorDescription;
+        this.disabled = disabled;
     }
 
     public Long getId() {
@@ -93,5 +98,13 @@ public class Requirement {
     @JsonIgnore
     public void setErrorDescription(String errorDescription) {
         this.errorDescription = errorDescription;
+    }
+
+    public boolean isDisabled() {
+        return disabled;
+    }
+
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
     }
 }

@@ -93,7 +93,7 @@ public class RequirementService {
                 // Skip empty lines and comments
                 if(line.isEmpty() || line.contains("#"))
                     continue;
-                Requirement req = new Requirement(line, project, Requirement.State.NOT_CHECKED, null);
+                Requirement req = new Requirement(line, project, Requirement.State.NOT_CHECKED, null, false);
                 create(req);
                 requirements.add(req);
             }
