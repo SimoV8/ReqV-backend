@@ -40,6 +40,14 @@ public class RequirementController {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteRequirement(@PathVariable("id") Long id) {
+        if(requirementService.delete(id))
+            return new ResponseEntity<>(HttpStatus.OK);
+        else
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
     @PostMapping
     public ResponseEntity<?> createRequirement(@Valid @RequestBody Requirement requirement) {
         requirement = requirementService.create(requirement);

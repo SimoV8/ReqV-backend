@@ -53,6 +53,14 @@ public class RequirementService {
         }
     }
 
+    public boolean delete(Long id) {
+        Requirement req = getRequirement(id);
+        if(req == null)
+            return false;
+        requirementRepository.delete(req);
+        return true;
+    }
+
     public Requirement update(Requirement req) {
         Requirement oldReq = getRequirement(req.getId());
         if(isValid(req) && oldReq != null && oldReq.getProject().getId().equals(req.getProject().getId())) {
