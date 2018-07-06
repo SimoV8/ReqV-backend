@@ -36,6 +36,12 @@ public class RequirementService {
         return requirementRepository.findByProjectIdOrderById(project.getId());
     }
 
+    public List<Requirement> getProjectRequirementsEnabled(Project project) {
+        if(project == null)
+            return null;
+        return requirementRepository.findByProjectIdAndDisabledOrderById(project.getId(), false);
+    }
+
     public Requirement getRequirement(Long id) {
         Requirement requirement = requirementRepository.findOne(id);
         if(isValid(requirement))

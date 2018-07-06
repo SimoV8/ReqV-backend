@@ -45,7 +45,7 @@ public class TaskService {
 
     public ByteArrayOutputStream translate(Long projectId) {
         Project project = projectService.getProjectOfAuthUser(projectId);
-        List<Requirement> reqList = requirementService.getProjectRequirements(project);
+        List<Requirement> reqList = requirementService.getProjectRequirementsEnabled(project);
 
         if(reqList == null || reqList.isEmpty())
             return null;
@@ -59,7 +59,7 @@ public class TaskService {
 
     public Task consistencyChecking(Long projectId) {
         Project project = projectService.getProjectOfAuthUser(projectId);
-        List<Requirement> reqList = requirementService.getProjectRequirements(project);
+        List<Requirement> reqList = requirementService.getProjectRequirementsEnabled(project);
 
         if(reqList == null || reqList.isEmpty())
             return null;
@@ -76,7 +76,7 @@ public class TaskService {
 
     public Task computeMUC(Long projectId) {
         Project project = projectService.getProjectOfAuthUser(projectId);
-        List<Requirement> reqList = requirementService.getProjectRequirements(project);
+        List<Requirement> reqList = requirementService.getProjectRequirementsEnabled(project);
 
         if(reqList == null || reqList.isEmpty())
             return null;
