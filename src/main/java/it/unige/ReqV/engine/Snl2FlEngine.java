@@ -1,14 +1,15 @@
 package it.unige.ReqV.engine;
 
+import it.sagelab.consistency.ConsistencyChecker;
+import it.sagelab.consistency.InconsistencyFinder;
+import it.sagelab.fe.snl2fl.Snl2FlException;
+import it.sagelab.fe.snl2fl.Snl2FlParser;
+import it.sagelab.reasoners.NuSMV;
+import it.sagelab.reasoners.translators.nusmv.NuSMVTranslator;
 import it.unige.ReqV.projects.tasks.Task;
 import it.unige.ReqV.projects.tasks.TaskRepository;
 import it.unige.ReqV.requirements.Requirement;
-import rcc.ConsistencyChecker;
-import rcc.InconsistencyFinder;
-import rcc.mc.NuSMV;
-import snl2fl.Snl2FlException;
-import snl2fl.Snl2FlParser;
-import snl2fl.ltl.nusmv.NuSMVTranslator;
+
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -104,7 +105,7 @@ public class Snl2FlEngine implements ProjectEngine {
 
                 runningTask.appendLog("\n\n##################################################################");
                 runningTask.appendLog("Minimum Unsatisfiable core of " + inconsistentReqs.size() + " requirements found:");
-                for(snl2fl.req.requirements.Requirement r : inconsistentReqs)
+                for(it.sagelab.models.psp.Requirement r : inconsistentReqs)
                     runningTask.appendLog(r.getText());
 
                 runningTask.setStatus(Task.Status.SUCCESS);
