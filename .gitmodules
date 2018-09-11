@@ -1,4 +1,3 @@
-[submodule "snl2fl"]
-	path = snl2fl
-	url = https://github.com/SAGE-Lab/snl2fl.git
-	branch = dev
+[submodule "SpecPro"]
+	path = SpecPro
+	url = https://github.com/SimoV8/SpecPro.git
