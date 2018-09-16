@@ -81,7 +81,7 @@ public class TaskService {
         if(reqList == null || reqList.isEmpty())
             return null;
 
-        String taskDescription = "Computing Minimum Unsatisfiable Core of " + reqList.size() + " requirements";
+        String taskDescription = "Computing Minimal Unsatisfiable Core of " + reqList.size() + " requirements";
         Task task = new Task(taskDescription, project, Task.Type.MINIMUM_UNSATISFIABLE_CORE);
         task = taskRepository.save(task);
 
