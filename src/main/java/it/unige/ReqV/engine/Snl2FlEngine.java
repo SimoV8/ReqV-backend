@@ -104,7 +104,7 @@ public class Snl2FlEngine implements ProjectEngine {
                 Task runningTask = taskRepository.findOne(taskId);
 
                 runningTask.appendLog("\n\n##################################################################");
-                runningTask.appendLog("Minimum Unsatisfiable core of " + inconsistentReqs.size() + " requirements found:");
+                runningTask.appendLog("Minimal Unsatisfiable core of " + inconsistentReqs.size() + " requirements found:");
                 for(it.sagelab.models.psp.Requirement r : inconsistentReqs)
                     runningTask.appendLog(r.getText());
 
