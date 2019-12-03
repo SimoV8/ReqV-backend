@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/user")
@@ -45,13 +46,13 @@ public class UserController {
 
     @GetMapping(value = "/{id}")
     public ResponseEntity<?> getUserById(@PathVariable("id") long id) {
-        User user = userService.findById(id);
-        if (user == null) {
+        Optional<User> user = userService.findById(id);
+        if (!user.isPresent()) {
             logger.error("User with id {} not found.", id);
             return new ResponseEntity(null, HttpStatus.NOT_FOUND);
         }
 
-        return new ResponseEntity<>(user, HttpStatus.OK);
+        return new ResponseEntity<>(user.get(), HttpStatus.OK);
     }
 
     @PostMapping("/sign-up")

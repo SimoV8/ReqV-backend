@@ -14,6 +14,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.Optional;
+
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
@@ -114,10 +116,11 @@ public class UserControllerTests {
         assertThat(response.getBody().getEmail(), is("new_email@test.com"));
         assertThat(response.getBody().getPassword(), nullValue());
 
-        User updatedUser = repository.findById(user1.getId());
-        assertThat(response.getBody().getUsername(), equalTo(updatedUser.getUsername()));
-        assertThat(response.getBody().getEmail(), equalTo(updatedUser.getEmail()));
-        assertTrue(bCryptPasswordEncoder.matches("1234", updatedUser.getPassword()));
+        Optional<User> updatedUser = repository.findById(user1.getId());
+        assertTrue(updatedUser.isPresent());
+        assertThat(response.getBody().getUsername(), equalTo(updatedUser.get().getUsername()));
+        assertThat(response.getBody().getEmail(), equalTo(updatedUser.get().getEmail()));
+        assertTrue(bCryptPasswordEncoder.matches("1234", updatedUser.get().getPassword()));
     }
 
     @Test
@@ -138,10 +141,11 @@ public class UserControllerTests {
         assertThat(response.getBody().getEmail(), is("new_email@test.com"));
         assertThat(response.getBody().getPassword(), nullValue());
 
-        User updatedUser = repository.findById(user1.getId());
-        assertThat(updatedUser.getUsername(), equalTo(response.getBody().getUsername()));
-        assertThat(updatedUser.getEmail(), equalTo(response.getBody().getEmail()));
-        assertTrue(bCryptPasswordEncoder.matches("new_password", updatedUser.getPassword()));
+        Optional<User> updatedUser = repository.findById(user1.getId());
+        assertTrue(updatedUser.isPresent());
+        assertThat(updatedUser.get().getUsername(), equalTo(response.getBody().getUsername()));
+        assertThat(updatedUser.get().getEmail(), equalTo(response.getBody().getEmail()));
+        assertTrue(bCryptPasswordEncoder.matches("new_password", updatedUser.get().getPassword()));
     }
 
     @Test
@@ -160,10 +164,11 @@ public class UserControllerTests {
         assertThat(response.getBody(), nullValue());
 
         // Check that the user didn't change
-        User user = repository.findById(user1.getId());
-        assertThat(user.getUsername(), equalTo(user1.getUsername()));
-        assertThat(user.getEmail(), equalTo(user1.getEmail()));
-        assertThat(user.getPassword(), equalTo(user1.getPassword()));
+        Optional<User> user = repository.findById(user1.getId());
+        assertTrue(user.isPresent());
+        assertThat(user.get().getUsername(), equalTo(user1.getUsername()));
+        assertThat(user.get().getEmail(), equalTo(user1.getEmail()));
+        assertThat(user.get().getPassword(), equalTo(user1.getPassword()));
     }
 
     @Test
@@ -182,10 +187,11 @@ public class UserControllerTests {
         assertThat(response.getBody(), nullValue());
 
         // Check that the user didn't change
-        User user = repository.findById(user1.getId());
-        assertThat(user.getUsername(), equalTo(user1.getUsername()));
-        assertThat(user.getEmail(), equalTo(user1.getEmail()));
-        assertThat(user.getPassword(), equalTo(user1.getPassword()));
+        Optional<User> user = repository.findById(user1.getId());
+        assertThat(user.isPresent(), equalTo(true));
+        assertThat(user.get().getUsername(), equalTo(user1.getUsername()));
+        assertThat(user.get().getEmail(), equalTo(user1.getEmail()));
+        assertThat(user.get().getPassword(), equalTo(user1.getPassword()));
     }
 
     @Test

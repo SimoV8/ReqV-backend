@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProjectService {
@@ -32,9 +33,9 @@ public class ProjectService {
      */
     public Project getProjectOfAuthUser(Long id) throws EntityNotFoundException {
         User user = userService.getAuthenticatedUser();
-        Project p = projectRepository.findOne(id);
-        if (p != null && p.getOwner().getId().equals(user.getId()))
-            return p;
+        Optional<Project> p = projectRepository.findById(id);
+        if (p.isPresent() && p.get().getOwner().getId().equals(user.getId()))
+            return p.get();
         else
             throw new EntityNotFoundException("Project with id " + id + " does not exist or you don't have the authorization to access it");
     }

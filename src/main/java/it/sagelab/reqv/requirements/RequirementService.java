@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 
 @Service
@@ -43,9 +44,9 @@ public class RequirementService {
     }
 
     public Requirement getRequirement(Long id) {
-        Requirement requirement = requirementRepository.findOne(id);
-        if(isValid(requirement))
-            return requirement;
+        Optional<Requirement> requirement = requirementRepository.findById(id);
+        if(requirement.isPresent() && isValid(requirement.get()))
+            return requirement.get();
         else
             return null;
     }

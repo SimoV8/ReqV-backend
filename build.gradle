@@ -1,22 +1,24 @@
 buildscript {
 	ext {
-		springBootVersion = '1.5.9.RELEASE'
+		springBootVersion = '2.2.1.RELEASE'
 	}
 	repositories {
 		mavenCentral()
 	}
 	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+		classpath("io.spring.gradle:dependency-management-plugin:1.0.8.RELEASE")
 	}
 }
 
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
+apply plugin: "io.spring.dependency-management"
 
 group = 'it.sagelab'
 version = '0.1.0'
-sourceCompatibility = 1.8
+sourceCompatibility = 1.11
 
 repositories {
 	mavenCentral()
@@ -25,15 +27,15 @@ repositories {
 
 dependencies {
 	compile('org.springframework.boot:spring-boot-starter-data-jpa')
-	compile('org.springframework.boot:spring-boot-starter-data-rest')
 	compile('org.springframework.boot:spring-boot-starter-web')
 	compile("org.springframework.boot:spring-boot-starter-security")
-    compile("io.springfox:springfox-swagger2:2.8.0")
-    compile("io.springfox:springfox-swagger-ui:2.8.0")
-    compile("io.jsonwebtoken:jjwt:0.7.0")
+	compile("org.springframework.plugin:spring-plugin-core:1.2.0.RELEASE")
+    compile("io.springfox:springfox-swagger2:2.9.2")
+    compile("io.springfox:springfox-swagger-ui:2.9.2")
+    compile("io.jsonwebtoken:jjwt:0.9.1")
     compile project(':SpecPro')
 	runtime('org.postgresql:postgresql')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
-	testCompile('org.apache.httpcomponents:httpclient:4.5.3')
+	testCompile('org.apache.httpcomponents:httpclient:4.5.10')
 	testCompile('com.h2database:h2')
 }

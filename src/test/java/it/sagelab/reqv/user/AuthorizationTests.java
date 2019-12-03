@@ -31,13 +31,13 @@ import static org.junit.Assert.assertThat;
 public class AuthorizationTests {
 
     @Autowired
-    TestRestTemplate restTemplate;
+    private TestRestTemplate restTemplate;
 
     @Autowired
-    public UserRepository repository;
+    private UserRepository repository;
 
     @Autowired
-    BCryptPasswordEncoder bCryptPasswordEncoder;
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Before
     public void setUp() {
