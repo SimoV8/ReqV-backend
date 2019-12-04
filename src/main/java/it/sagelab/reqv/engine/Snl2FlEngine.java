@@ -7,11 +7,12 @@ import it.sagelab.reqv.requirements.Requirement;
 import it.sagelab.specpro.consistency.BinaryInconsistencyFinder;
 import it.sagelab.specpro.consistency.ConsistencyChecker;
 import it.sagelab.specpro.consistency.InconsistencyFinder;
-import it.sagelab.specpro.fe.snl2fl.Snl2FlException;
-import it.sagelab.specpro.fe.snl2fl.Snl2FlParser;
+import it.sagelab.specpro.fe.PSPFrontEnd;
+import it.sagelab.specpro.fe.ParseException;
+import it.sagelab.specpro.models.InputRequirement;
+import it.sagelab.specpro.models.ltl.LTLSpec;
 import it.sagelab.specpro.reasoners.NuSMV;
 import it.sagelab.specpro.reasoners.translators.NuSMVTranslator;
-
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -25,11 +26,11 @@ public class Snl2FlEngine implements ProjectEngine {
 
 
     public Requirement validate(Requirement req) {
-        Snl2FlParser parser = new Snl2FlParser();
+        PSPFrontEnd fe = new PSPFrontEnd();
         try {
-            parser.parseString(req.getText());
+            fe.parseString(req.getText());
             req.setState(Requirement.State.COMPLIANT);
-        } catch (Snl2FlException e) {
+        } catch (ParseException e) {
             req.setState(Requirement.State.ERROR);
             req.setErrorDescription(e.getMessage());
         }
@@ -38,17 +39,16 @@ public class Snl2FlEngine implements ProjectEngine {
     }
 
     public ByteArrayOutputStream translate(List<Requirement> reqList) {
-        Snl2FlParser parser = new Snl2FlParser();
-        try {
-            for(Requirement req: reqList) {
-                parser.parseString(req.getText());
-            }
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            parser.translate(new NuSMVTranslator(), new PrintStream(stream));
 
+
+        try {
+            LTLSpec spec = parseReqList(reqList);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            NuSMVTranslator translator = new NuSMVTranslator();
+            translator.translate(new PrintStream(stream), spec);
             return stream;
 
-        } catch (Snl2FlException e) {
+        } catch (ParseException e) {
             return null;
         }
     }
@@ -56,12 +56,11 @@ public class Snl2FlEngine implements ProjectEngine {
     public void runConsistencyCheck(TaskRepository taskRepository, Task task, List<Requirement> reqList) {
 
         try {
-            Snl2FlParser parser = new Snl2FlParser();
-            parseReqList(parser, reqList);
+            LTLSpec spec = parseReqList(reqList);
 
 
             File tempFile = File.createTempFile("/tmp/out_" + task.getProject().getId(), ".nusmv");
-            ConsistencyChecker cc = new ConsistencyChecker(new NuSMV(300), parser, tempFile.getAbsolutePath());
+            ConsistencyChecker cc = new ConsistencyChecker(new NuSMV(300), spec, tempFile.getAbsolutePath());
 
             final long taskId = task.getId();
             cc.runAsync((res) -> {
@@ -77,59 +76,55 @@ public class Snl2FlEngine implements ProjectEngine {
 
                 tempFile.delete();
             });
-        } catch (Snl2FlException | IOException e) {
+        } catch (ParseException | IOException e) {
             task.appendLog("[ERROR] " + e.getMessage());
         }
     }
 
     public void runInconsistencyExplanation(TaskRepository taskRepository, Task task, List<Requirement> reqList) {
-//        try {
-//            Snl2FlParser parser = new Snl2FlParser();
-//            parseReqList(parser, reqList);
-//
-//
-//            File tempFile = File.createTempFile("/tmp/out_" + task.getProject().getId(), ".nusmv");
-//            ConsistencyChecker cc = new ConsistencyChecker(new NuSMV(300), parser, tempFile.getAbsolutePath());
-//            InconsistencyFinder inconsistencyFinder = new BinaryInconsistencyFinder(cc);
-//
-//            AtomicInteger counter = new AtomicInteger();
-//            final long taskId = task.getId();
-//            final int reqSize = reqList.size();
-//
-//            inconsistencyFinder.run(
-//                (requirement, result) -> {
-//                    Task runningTask = taskRepository.findOne(taskId);
-//
-//                    if(result == ConsistencyChecker.Result.FAIL) {
-//                        runningTask.appendLog("[ERROR] Error occured during consistency check");
-//                        runningTask.setStatus(Task.Status.FAIL);
-//                    }
-//                    else
-//                        runningTask.appendLog(counter.incrementAndGet() + "/" + reqSize);
-//                    taskRepository.save(runningTask);
-//                },
-//                (inconsistentReqs) -> {
-//                Task runningTask = taskRepository.findOne(taskId);
-//
-//                runningTask.appendLog("\n\n##################################################################");
-//                runningTask.appendLog("Minimal Unsatisfiable core of " + inconsistentReqs.size() + " requirements found:");
-//                for(Requirement r : inconsistentReqs)
-//                    runningTask.appendLog(r.getText());
-//
-//                runningTask.setStatus(Task.Status.SUCCESS);
-//
-//                taskRepository.save(runningTask);
-//                tempFile.delete();
-//            });
-//        } catch (Snl2FlException | IOException e) {
-//            task.appendLog("[ERROR] " + e.getMessage());
-//        }
+        try {
+            LTLSpec spec = parseReqList(reqList);
+
+
+            File tempFile = File.createTempFile("/tmp/out_" + task.getProject().getId(), ".nusmv");
+            ConsistencyChecker cc = new ConsistencyChecker(new NuSMV(300), spec, tempFile.getAbsolutePath());
+            InconsistencyFinder inconsistencyFinder = new BinaryInconsistencyFinder(cc);
+
+            AtomicInteger counter = new AtomicInteger();
+            final long taskId = task.getId();
+            final int reqSize = reqList.size();
+
+
+            inconsistencyFinder.runAsync(
+                (inconsistentReqs) -> {
+                Optional<Task> runningTaskOpt = taskRepository.findById(taskId);
+
+                if(runningTaskOpt.isPresent()) {
+                    Task runningTask = runningTaskOpt.get();
+                    runningTask.appendLog("\n\n##################################################################");
+                    runningTask.appendLog("Minimal Unsatisfiable core of " + inconsistentReqs.size() + " requirements found:");
+                    for (InputRequirement r : inconsistentReqs)
+                        runningTask.appendLog(r.getText());
+
+                    runningTask.setStatus(Task.Status.SUCCESS);
+
+                    taskRepository.save(runningTask);
+                }
+                tempFile.delete();
+            });
+        } catch (ParseException | IOException e) {
+            task.appendLog("[ERROR] " + e.getMessage());
+        }
     }
 
-    private void parseReqList(Snl2FlParser parser, List<Requirement> reqList) {
-        for (Requirement req : reqList) {
-            parser.parseString(req.getText());
+    private LTLSpec parseReqList(List<Requirement> reqList) {
+        PSPFrontEnd fe = new PSPFrontEnd();
+        StringBuilder builder = new StringBuilder();
+        for(Requirement req: reqList) {
+            builder.append(req.getText());
+            builder.append("\n");
         }
+        return fe.parseString(builder.toString());
     }
 
 }
