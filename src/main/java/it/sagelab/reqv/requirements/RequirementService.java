@@ -1,8 +1,8 @@
 package it.sagelab.reqv.requirements;
 
-import it.sagelab.reqv.engine.EngineFactory;
 import it.sagelab.reqv.projects.Project;
 import it.sagelab.reqv.projects.ProjectService;
+import it.sagelab.reqv.projects.tasks.TaskExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -53,7 +53,8 @@ public class RequirementService {
 
     public Requirement create(Requirement req) {
         if(req.getId() == null && isValid(req)) {
-            req = EngineFactory.getEngine(req.getProject().getType()).validate(req);
+            TaskExecutor executor = new TaskExecutor(req.getProject().getType());
+            req = executor.validate(req);
             return requirementRepository.save(req);
         } else {
             return null;
@@ -71,7 +72,7 @@ public class RequirementService {
     public Requirement update(Requirement req) {
         Requirement oldReq = getRequirement(req.getId());
         if(isValid(req) && oldReq != null && oldReq.getProject().getId().equals(req.getProject().getId())) {
-            req = EngineFactory.getEngine(req.getProject().getType()).validate(req);
+            req = new TaskExecutor(req.getProject().getType()).validate(req);
             return requirementRepository.save(req);
         }
         else {

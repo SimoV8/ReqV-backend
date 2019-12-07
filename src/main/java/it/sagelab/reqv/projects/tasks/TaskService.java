@@ -2,8 +2,6 @@ package it.sagelab.reqv.projects.tasks;
 
 import it.sagelab.reqv.requirements.Requirement;
 import it.sagelab.reqv.requirements.RequirementService;
-import it.sagelab.reqv.engine.EngineFactory;
-import it.sagelab.reqv.engine.Snl2FlEngine;
 import it.sagelab.reqv.projects.Project;
 import it.sagelab.reqv.projects.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +48,7 @@ public class TaskService {
         if(reqList == null || reqList.isEmpty())
             return null;
 
-        ByteArrayOutputStream stream = EngineFactory.getEngine(project.getType()).translate(reqList);
+        ByteArrayOutputStream stream = new TaskExecutor(project.getType()).translate(reqList);
 
         // TODO: save Task in db
 
@@ -68,8 +66,7 @@ public class TaskService {
         Task task = new Task(taskDescription, project, Task.Type.CONSISTENCY_CHECKING);
         task = taskRepository.save(task);
 
-        Snl2FlEngine engine = new Snl2FlEngine();
-        engine.runConsistencyCheck(taskRepository, task, reqList);
+        new TaskExecutor(project.getType()).runConsistencyCheck(taskRepository, task, reqList);
 
         return task;
     }
@@ -85,8 +82,7 @@ public class TaskService {
         Task task = new Task(taskDescription, project, Task.Type.MINIMUM_UNSATISFIABLE_CORE);
         task = taskRepository.save(task);
 
-        Snl2FlEngine engine = new Snl2FlEngine();
-        engine.runInconsistencyExplanation(taskRepository, task, reqList);
+        new TaskExecutor(project.getType()).runInconsistencyExplanation(taskRepository, task, reqList);
 
         return task;
     }

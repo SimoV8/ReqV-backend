@@ -13,15 +13,12 @@ import java.util.Optional;
 public class ProjectService {
 
     private ProjectRepository projectRepository;
-    private ProjectTypeRepository projectTypeRepository;
     private UserService userService;
 
     @Autowired
     public ProjectService(ProjectRepository projectRepository,
-                          ProjectTypeRepository projectTypeRepository,
                           UserService userService) {
         this.projectRepository = projectRepository;
-        this.projectTypeRepository = projectTypeRepository;
         this.userService = userService;
     }
 
@@ -68,11 +65,4 @@ public class ProjectService {
         return projectRepository.save(project);
     }
 
-    /**
-     * Retrieves all the project types
-     * @return The list of project types
-     */
-    public List<ProjectType> getTypes() {
-        return projectTypeRepository.findAll();
-    }
 }

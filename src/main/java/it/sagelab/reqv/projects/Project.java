@@ -8,6 +8,12 @@ import javax.validation.constraints.NotNull;
 
 @Entity
 public class Project {
+
+    public enum Type {
+        PSP,
+        LTL;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -20,13 +26,12 @@ public class Project {
     @ManyToOne
     private User owner;
 
-    @ManyToOne
     @NotNull
-    private ProjectType type;
+    private Type type;
 
     public Project() { }
 
-    public Project(String name, String  description, User owner, ProjectType projectType) {
+    public Project(String name, String  description, User owner, Type projectType) {
         this.name = name;
         this.description = description;
         this.owner = owner;
@@ -61,11 +66,11 @@ public class Project {
         this.owner = owner;
     }
 
-    public ProjectType getType() {
+    public Type getType() {
         return type;
     }
 
-    public void setType(ProjectType type) {
+    public void setType(Type type) {
         this.type = type;
     }
 }

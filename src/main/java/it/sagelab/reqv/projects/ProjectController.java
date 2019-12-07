@@ -20,8 +20,8 @@ public class ProjectController {
     }
 
     @GetMapping("/types")
-    public List<ProjectType> getTypes() {
-        return projectService.getTypes();
+    public Project.Type[] getTypes() {
+        return Project.Type.values();
     }
 
     @GetMapping

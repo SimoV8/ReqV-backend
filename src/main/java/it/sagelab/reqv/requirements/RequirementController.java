@@ -1,7 +1,7 @@
 package it.sagelab.reqv.requirements;
 
-import it.sagelab.reqv.engine.EngineFactory;
-import it.sagelab.reqv.projects.ProjectType;
+import it.sagelab.reqv.projects.Project;
+import it.sagelab.reqv.projects.tasks.TaskExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -78,8 +78,9 @@ public class RequirementController {
         List<Requirement> reqList = requirementService.getProjectRequirements(projectId);
         if(reqList == null || reqList.isEmpty())
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-        ProjectType projectType = reqList.get(0).getProject().getType();
-        ByteArrayOutputStream stream = EngineFactory.getEngine(projectType).translate(reqList);
+        Project.Type projectType = reqList.get(0).getProject().getType();
+        TaskExecutor executor = new TaskExecutor(projectType);
+        ByteArrayOutputStream stream = executor.translate(reqList);
 
         if(stream == null || stream.toByteArray().length == 0)
             return new ResponseEntity<>("Impossible to translate, check that all requirements are compliant", HttpStatus.BAD_REQUEST);
