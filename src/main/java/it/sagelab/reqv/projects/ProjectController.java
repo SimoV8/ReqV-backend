@@ -42,4 +42,13 @@ public class ProjectController {
         else
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
     }
+
+    @PutMapping
+    public ResponseEntity<?> editProject(@Valid @RequestBody Project project) {
+        project = projectService.update(project);
+        if (project != null)
+            return new ResponseEntity<>(project, HttpStatus.OK);
+        else
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+    }
 }

@@ -1,5 +1,7 @@
 package it.sagelab.reqv.projects;
 
+import it.sagelab.reqv.projects.tasks.TaskExecutor;
+import it.sagelab.reqv.requirements.Requirement;
 import it.sagelab.reqv.user.User;
 import it.sagelab.reqv.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +65,19 @@ public class ProjectService {
         User owner = userService.getAuthenticatedUser();
         project.setOwner(owner);
         return projectRepository.save(project);
+    }
+
+    public Project update(Project project) {
+        Optional<Project> editProject = projectRepository.findById(project.getId());
+        if(editProject.isPresent() && editProject.get().getOwner().getId() == userService.getAuthenticatedUser().getId()) {
+            Project prj = editProject.get();
+            prj.setName(project.getName());
+            prj.setDescription(project.getDescription());
+            return projectRepository.save(prj);
+        }
+        else {
+            return null;
+        }
     }
 
 }
