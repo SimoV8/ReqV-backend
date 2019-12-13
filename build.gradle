@@ -35,7 +35,18 @@ dependencies {
     compile("io.jsonwebtoken:jjwt:0.9.1")
     compile project(':SpecPro')
 	runtime('org.postgresql:postgresql')
+	compile('com.h2database:h2')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 	testCompile('org.apache.httpcomponents:httpclient:4.5.10')
 	testCompile('com.h2database:h2')
+}
+
+task bootRunDev(type: org.springframework.boot.gradle.tasks.run.BootRun, dependsOn: 'classes') {
+	group = 'Application'
+	doFirst() {
+		main = bootJar.mainClassName
+		classpath = sourceSets.main.runtimeClasspath
+		systemProperty 'spring.profiles.active', 'local'
+
+	}
 }
