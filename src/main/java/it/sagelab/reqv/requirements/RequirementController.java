@@ -9,7 +9,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
 import java.io.ByteArrayOutputStream;
@@ -63,29 +62,24 @@ public class RequirementController {
     }
 
     @PostMapping("/file")
-    public ResponseEntity<?> singleFileUpload(@RequestParam("pId") Long projectId,
-                                   @RequestParam("file") MultipartFile file,
-                                   RedirectAttributes redirectAttributes) {
-        List<Requirement> requirements = requirementService.parseFile(file, projectId);
+    public ResponseEntity<?> importFile(@RequestParam("pId") Long projectId,
+                                        @RequestParam("file") MultipartFile file,
+                                        @RequestParam("format") String format) {
+        List<Requirement> requirements = requirementService.importFile(file, projectId, format);
         if(requirements != null)
             return new ResponseEntity<>(requirements, HttpStatus.OK);
         else
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
     }
 
-    @GetMapping("/translate")
-    public ResponseEntity<?> translateRequirements(@RequestParam("pId") Long projectId) {
-        List<Requirement> reqList = requirementService.getProjectRequirements(projectId);
-        if(reqList == null || reqList.isEmpty())
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-        Project.Type projectType = reqList.get(0).getProject().getType();
-        TaskExecutor executor = new TaskExecutor(projectType);
-        ByteArrayOutputStream stream = executor.translate(reqList);
-
+    @GetMapping("/file")
+    public ResponseEntity<?> exportFile(@RequestParam("pId") Long projectId, @RequestParam("format") String format) {
+        ByteArrayOutputStream stream = requirementService.exportFile(projectId, format);
         if(stream == null || stream.toByteArray().length == 0)
-            return new ResponseEntity<>("Impossible to translate, check that all requirements are compliant", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Impossible to export, check that all requirements are compliant", HttpStatus.BAD_REQUEST);
         HttpHeaders header = new HttpHeaders();
         header.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        header.add("Content-Description", format);
 
         return new ResponseEntity<>(stream.toByteArray(), header, HttpStatus.OK);
     }

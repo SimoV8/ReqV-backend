@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -96,22 +97,25 @@ public class RequirementService {
         return false;
     }
 
-    public List<Requirement> parseFile(MultipartFile file, Long projectId) {
+    public List<Requirement> importFile(MultipartFile file, Long projectId, String format) {
         Project project = projectService.getProjectOfAuthUser(projectId);
+        List<Requirement> requirements = null;
         if(project == null)
             return null;
         try {
-            List<Requirement> requirements = new ArrayList<>();
-            Scanner scanner = new Scanner(file.getInputStream());
+            switch (format) {
+                case "text":
+                    requirements = parseTextFile(file, project);
+                    break;
+                case "csv":
+                    requirements = parseCsvFile(file, project);
+                    break;
+                default:
+                    return null;
+            }
 
-            while(scanner.hasNextLine()) {
-                String line = scanner.nextLine().trim();
-                // Skip empty lines and comments
-                if(line.isEmpty() || line.contains("#"))
-                    continue;
-                Requirement req = new Requirement(line, project, Requirement.State.NOT_CHECKED, null, false);
+            for(Requirement req: requirements) {
                 create(req);
-                requirements.add(req);
             }
 
             return requirements;
@@ -120,6 +124,48 @@ public class RequirementService {
         }
     }
 
+    private List<Requirement> parseCsvFile(MultipartFile file, Project project) {
+        List<Requirement> requirements = new ArrayList<>();
+
+        return requirements;
+    }
+
+    private List<Requirement> parseTextFile(MultipartFile file, Project project) throws IOException {
+        List<Requirement> requirements = new ArrayList<>();
+        Scanner scanner = new Scanner(file.getInputStream());
+
+        while(scanner.hasNextLine()) {
+            String line = scanner.nextLine().trim();
+            // Skip empty lines and comments
+            if(line.isEmpty() || line.contains("#"))
+                continue;
+            Requirement req = new Requirement(line, project, Requirement.State.NOT_CHECKED, null, false);
+            requirements.add(req);
+        }
+
+        return requirements;
+    }
+
+    public ByteArrayOutputStream exportFile(Long projectId, String format) {
+        List<Requirement> reqList = getProjectRequirements(projectId);
+
+        if(reqList == null || reqList.isEmpty())
+            return null;
+
+        RequirementsExporter exporter = new RequirementsExporter(reqList.get(0).getProject().getType());
+
+        switch (format) {
+            case "text":
+                return exporter.exportTextFile(reqList);
+            case "csv":
+                return exporter.exportCSVFile(reqList);
+            case "nusmv":
+            case "aalta":
+                return exporter.exportSpecification(reqList, format);
+            default:
+                return null;
+        }
+    }
 
 
 }
